@@ -1,92 +1,125 @@
+const fs = require('fs')
+
 class ProductManager {
-  constructor () {
-      this.products = []
+  static lastID = 0
+  constructor (path) {
+    this.path = path
   }
 
-  addProduct(product) {
+  async addProduct(product) {
+    try {
       if(product.title && product.description && product.price && product.thumbnail && product.code && product.stock) {
-          if(this.products.length > 0){
-              const code = this.products.find(p => p.code === product.code)
-              if(code) {
-                  return 'Ya existe el codigo de producto'
-              }
-              product.id = this.products.length + 1
-              this.products.push(product)
-              return this.products
-          } else {
-              product.id = 1
-              this.products.push(product)
-              return this.products
-          }
+        const data = await fs.promises.readFile(this.path, 'utf-8')
+        const products = await JSON.parse(data);
+
+        if(products.length > 0){
+            const code = products.find(p => p.code === product.code)
+            if(code) {
+                return 'Ya existe el codigo de producto'
+            }
+
+            product.id = ++ProductManager.lastID,
+            products.push(product)
+            await fs.promises.writeFile(this.path, JSON.stringify(products))
+        } else {
+            product.id = 1
+            products.push(product)
+            await fs.promises.writeFile(this.path, JSON.stringify(products))
+            return 'El producto fue agregado'
+        }
       } else {
           return 'Debe completar todos los campos'
       }
-  }
-
-  getProducts() {
-      return this.products
-  }
-
-  getProductById(id) {
-      const product = this.products.find(p => p.id === id)
-      if(product){
-          return product
-      } else {
-          return 'Not found'
-      }
-  }
+    } catch (error) {
+        console.log(error)
+    }
 }
 
-const productManager = new ProductManager()
-
-productManager.getProducts()
-
-const product1 = {
-  title: 'producto1',
-  description: 'xxxxxxxxxxxx',
-  price: 1200,
-  thumbnail: 'htpp://xxxxxxxxxxxxx',
-  code: 'asfk2223kkk',
-  stock: 100
+async getProducts() {
+    try {
+        const data = await fs.promises.readFile(this.path, 'utf-8')
+        const products = await JSON.parse(data)
+        return products
+    } catch (error) {
+        console.log(error)
+    }
 }
 
-const product2 = {
-  title: 'producto2',
-  description: 'yyyyyyyyyyyyyy',
-  price: 5000,
-  thumbnail: 'htpp://yyyyyyyyyyyyy',
-  code: 'sdfskjdhf11111',
-  stock: 80
+async getProductById(id) {
+    try {
+        const data = await fs.promises.readFile(this.path, 'utf-8')
+        const products = await JSON.parse(data)
+        const product = products.find(p => p.id === id)
+        if(product){
+            return product
+        } else {
+            return 'Not found'
+        }
+    } catch (error) {
+        console.log(error)
+    }
 }
 
-const product3 = {
-  title: 'producto3',
-  description: 'zzzzzzzzzzzzzzz',
-  price: 300,
-  thumbnail: 'htpp://zzzzzzzzzzzzzzzzzzzz',
-  code: 'sdkjhdgkjhs223r555',
-  stock: 50
+async updateProduct(id, updates) {
+    try {
+        const data = await fs.promises.readFile(this.path, 'utf-8')
+        const products = await JSON.parse(data)
+        const oldProduct = products.find(prod => prod.id === id)
+        const newProduct = { ...oldProduct, ...updates }
+        products[id - 1] = newProduct
+        await fs.promises.writeFile(this.path, JSON.stringify(products))
+        return 'Productos actualizado'
+    } catch (error) {
+        console.log(error)
+    }
 }
 
-console.log(productManager.addProduct(product1))
-console.log(productManager.addProduct(product2))
-console.log(productManager.addProduct(product3))
-
-console.log('|************************Listado de productos************************|')
-const products = productManager.getProducts()
-console.log('Products: ', products)
-
-
-const product4 = {
-  title: 'producto4',
-  description: 'zzzzzzzzzzzzzzz',
-  price: 300,
-  thumbnail: 'htpp://zzzzzzzzzzzzzzzzzzzz',
-  code: 'sdkjhdgkjhs223r555',
-  stock: 50
+async deleteProduct(id) {
+    try {            
+        const data = await fs.promises.readFile(this.path, 'utf-8')
+        const products = await JSON.parse(data)
+        const newProducts = products.filter(p => p.id !== id)
+        await fs.promises.writeFile(this.path, JSON.stringify(newProducts))
+        return 'Producto eliminado'
+    } catch (error) {
+        console.log(error)
+    }
+}
 }
 
-console.log(productManager.addProduct(product4))
+const productManager = new ProductManager('./products.txt')
 
-console.log('|***********************Buscar producto*************************|')
-console.log(productManager.getProductById(3))
+const verProductos = async () => {
+  const productos = await productManager.getProducts()
+  console.log(productos)
+}
+
+// verProductos()
+
+// productManager.addProduct({
+//     "title": 'producto prueba2',
+//     "description": 'Este es un producto prueba',
+//     "price": 200,
+//     "thumbnail": 'Sin imagen',
+//     "code": 'abc124',
+//     "stock":25
+// })
+
+//  verProductos()
+
+const productoPorId = async (id) => {
+  const producto = await productManager.getProductById(id)
+  console.log(producto)
+}
+
+// productoPorId(1)
+
+// productManager.updateProduct(2, {
+//     "thumbnail": "asdasdasd",
+// })
+
+//  verProductos()
+
+productManager.deleteProduct(1)
+
+// verProductos()
