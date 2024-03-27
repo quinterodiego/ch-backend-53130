@@ -18,13 +18,13 @@ productsRouter.get('/', async (req, res) => {
     res.status(200).json({ 
       "status": "success",
       "result": result 
-  })
+    })
   } catch (error) {
     console.log(error)
     res.status(400).json({ 
       "status": "error",
       "message": "No se pudieron obtener los productos" 
-  })
+    })
   }
    
 })
@@ -36,13 +36,13 @@ productsRouter.get('/:pid', async (req, res) => {
     res.status(200).json({ 
       "status": "success",
       "result": product
-  })
+    })
   } catch (error) {
     console.log(error)
     res.status(400).json({ 
       "status": "error",
       "message": "No se pudo obtener el producto" 
-  })
+    })
   }
 })
 
@@ -53,13 +53,13 @@ productsRouter.post('/', productValidator, async (req, res) => {
     res.status(201).send({
         "status": "success",
         "result": resp
-    })
+      })
   } catch (error) {
     console.log(error)
     res.status(400).json({ 
       "status": "error",
       "message": "No se pudo crear el producto" 
-  })
+    })
   }
    
 })
@@ -78,7 +78,7 @@ productsRouter.put('/:pid', async (req, res) => {
     res.status(400).json({ 
       "status": "error",
       "message": "No se pudo actualizar el producto" 
-  })
+    })
   }
    
 })
@@ -96,7 +96,7 @@ productsRouter.delete('/:pid', async (req, res) => {
     res.status(400).json({ 
       "status": "error",
       "message": "No se pudo eliminar el producto" 
-  })
+    })
   }
    
 })
